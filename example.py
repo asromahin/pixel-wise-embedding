@@ -135,8 +135,8 @@ if __name__ == '__main__':
 
     for epoch in range(EPOCHS):
 
-        train_logs_ade20k = train_step.run(train_loader_ade20k, [tester_cars.test])
-        train_logs_cocostaff = train_step.run(train_loader_cocostaff, [tester_cars.test])
+        train_logs_ade20k = train_step.run(train_loader_ade20k, [tester_cars.test, tester_cats.test, tester_fish.test])
+        train_logs_cocostaff = train_step.run(train_loader_cocostaff, [tester_cars.test, tester_cats.test, tester_fish.test])
 
         val_logs_ade20k = val_step.run(train_loader_ade20k)
         val_logs_cocostaff = val_step.run(train_loader_cocostaff)

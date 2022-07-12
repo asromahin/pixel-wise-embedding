@@ -49,7 +49,7 @@ class TrainStep(BaseStep):
             if callbacks is not None:
                 for callback in callbacks:
                     callback()
-            pbar.set_postfix({k: v[-1] for k, v in log_data.items()})
+            pbar.set_postfix({k: np.mean(v) for k, v in log_data.items()})
         log_data = {k: np.mean(v) for k, v in log_data.items()}
         return log_data
 
@@ -90,7 +90,7 @@ class TrainStepLossTrain(BaseStep):
             if callbacks is not None:
                 for callback in callbacks:
                     callback()
-            pbar.set_postfix({k: v[-1] for k, v in log_data.items()})
+            pbar.set_postfix({k: np.mean(v) for k, v in log_data.items()})
         log_data = {k: np.mean(v) for k, v in log_data.items()}
         return log_data
 
@@ -115,7 +115,7 @@ class ValStep(BaseStep):
             if callbacks is not None:
                 for callback in callbacks:
                     callback()
-        pbar.set_postfix({k: v[-1] for k, v in log_data.items()})
+            pbar.set_postfix({k: np.mean(v) for k, v in log_data.items()})
         log_data = {k: np.mean(v) for k, v in log_data.items()}
         return log_data
 
