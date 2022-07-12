@@ -9,7 +9,7 @@ from tester import Tester
 
 
 class Visualizer:
-    def __init__(self, model, images_paths, image_size=256, device='cuda'):
+    def __init__(self, model, images_paths, image_size=256, threshold=0.9, device='cuda'):
         self.image_size = image_size
         self.tester = Tester(
             model=model,
@@ -18,6 +18,7 @@ class Visualizer:
             y=0.5,
             target_b=0,
             save_folder=None,
+            threshold=threshold,
             transforms=A.Resize(self.image_size, self.image_size),
             device=device,
             plot_index=False,
@@ -55,7 +56,8 @@ if __name__ == '__main__':
     model.eval()
     viz = Visualizer(
         model=model,
-        images_paths=sorted(glob.glob('data/test_images/plates_v2/*')),
+        images_paths=sorted(glob.glob('data/test_images/production/*'))[:2],
         device='cpu',
-        image_size=256+128,
+        image_size=1024,
+        threshold=0.7,
     )
