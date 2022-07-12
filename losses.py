@@ -38,7 +38,7 @@ class BasePixelWiseLoss(torch.nn.Module):
 
         collect_target_mask = torch.cat(collect_target_mask_list, dim=1).to(dtype=torch.float32)
         collect_out = torch.cat(collect_out_list, dim=1)
-      return collect_out, collect_target_mask
+    return collect_out, collect_target_mask
 
   def calc_loss(self, outs, masks):
     if self.batch_isolated:

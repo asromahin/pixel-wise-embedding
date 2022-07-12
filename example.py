@@ -24,6 +24,7 @@ if __name__ == '__main__':
     BATCH_SIZE = 2
     EPOCHS = 100
     RESULT_PATH = 'results'
+    RESULT_TESTER = os.path.join(RESULT_PATH, 'tester')
     BEST_MODEL = os.path.join(RESULT_PATH, 'best.pth')
     LAST_MODEL = os.path.join(RESULT_PATH, 'last.pth')
 
@@ -99,7 +100,7 @@ if __name__ == '__main__':
         images_paths=sorted(glob.glob('data/test_images/cars/*')),
         x=0.2, y=0.4,
         target_b=0,
-        save_folder='tester_results/cars',
+        save_folder=os.path.join(RESULT_TESTER, 'cars'),
         transforms=A.Resize(SHAPE[0], SHAPE[1]),
         threshold=0.9,
         gif_duration=500,
@@ -112,7 +113,7 @@ if __name__ == '__main__':
         images_paths=sorted(glob.glob('data/test_images/cats/*')),
         x=0.4, y=0.6,
         target_b=1,
-        save_folder='tester_results/cats',
+        save_folder=os.path.join(RESULT_TESTER, 'cats'),
         transforms=A.Resize(SHAPE[0], SHAPE[1]),
         threshold=0.9,
         gif_duration=500,
@@ -125,7 +126,7 @@ if __name__ == '__main__':
         images_paths=sorted(glob.glob('data/test_images/cats/*')),
         x=0.7, y=0.7,
         target_b=0,
-        save_folder='tester_results/cats',
+        save_folder=os.path.join(RESULT_TESTER, 'fish'),
         transforms=A.Resize(SHAPE[0], SHAPE[1]),
         threshold=0.9,
         gif_duration=500,
