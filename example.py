@@ -120,6 +120,19 @@ if __name__ == '__main__':
         device=DEVICE,
     )
 
+    tester_fish = Tester(
+        model,
+        images_paths=sorted(glob.glob('data/test_images/cats/*')),
+        x=0.7, y=0.7,
+        target_b=0,
+        save_folder='tester_results/cats',
+        transforms=A.Resize(SHAPE[0], SHAPE[1]),
+        threshold=0.9,
+        gif_duration=500,
+        run_every=100,
+        device=DEVICE,
+    )
+
     for epoch in range(EPOCHS):
 
         train_logs_ade20k = train_step.run(train_loader_ade20k, [tester_cars.test])
