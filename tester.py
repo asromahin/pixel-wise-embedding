@@ -100,9 +100,12 @@ class Tester:
     images = torch.cat(images, dim=0)
     return images
 
-  def plot_predicts(self, imgs):
+  def predict(self, imgs):
     with torch.no_grad():
       outs = self.model(imgs.to(self.device)).detach().cpu().numpy()
+    return outs
+
+  def plot_predicts(self, imgs, outs):
     out_np = np.moveaxis(outs, 1, -1)
     x = int(self.x * imgs.shape[3])
     y = int(self.y * imgs.shape[2])
@@ -140,7 +143,8 @@ class Tester:
 
   def test(self):
     if self._real_iter % self.run_every == 0:
-      pims = self.plot_predicts(self.imgs)
+      outs = self.predict(self.imgs)
+      pims = self.plot_predicts(self.imgs, outs)
       self.save_results(pims)
       self.iter += 1
     self._real_iter += 1

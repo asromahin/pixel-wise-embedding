@@ -28,7 +28,8 @@ class Visualizer:
 
         cid = self.fig.canvas.mpl_connect('button_press_event', self.onclick)
 
-        pims = self.tester.plot_predicts(self.tester.imgs)
+        self.outs = self.tester.predict(self.tester.imgs)
+        pims = self.tester.plot_predicts(self.tester.imgs, self.outs)
         pim = np.concatenate(pims, axis=1)
         self.axs.imshow(pim)
         plt.show()
@@ -43,10 +44,9 @@ class Visualizer:
             self.tester.target_b = target_b
             self.tester.x = event.xdata / self.image_size - target_b
             self.tester.y = event.ydata / self.image_size
-            pims = self.tester.plot_predicts(self.tester.imgs)
+            pims = self.tester.plot_predicts(self.tester.imgs, self.outs)
             pim = np.concatenate(pims, axis=1)
             self.axs.imshow(pim)
-            # self.fig.clf()
             self.axs.imshow(pim)
             self.fig.canvas.draw()
 
@@ -56,8 +56,8 @@ if __name__ == '__main__':
     model.eval()
     viz = Visualizer(
         model=model,
-        images_paths=sorted(glob.glob('data/test_images/production/*'))[:2],
+        images_paths=sorted(glob.glob('data/test_images/garden/*')),
         device='cpu',
-        image_size=1024,
-        threshold=0.7,
+        image_size=256,
+        threshold=0.9,
     )
