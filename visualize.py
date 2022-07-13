@@ -4,6 +4,7 @@ import torch
 import glob
 import albumentations as A
 import numpy as np
+import argparse
 
 from tester import Tester
 
@@ -35,29 +36,36 @@ class Visualizer:
         plt.show()
 
     def onclick(self, event):
-        print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-              ('double' if event.dblclick else 'single', event.button,
-               event.x, event.y, event.xdata, event.ydata))
-        if event.ydata < self.image_size:
-            target_b = int(event.xdata // self.image_size)
-            print(target_b)
-            self.tester.target_b = target_b
-            self.tester.x = event.xdata / self.image_size - target_b
-            self.tester.y = event.ydata / self.image_size
-            pims = self.tester.plot_predicts(self.tester.imgs, self.outs)
-            pim = np.concatenate(pims, axis=1)
-            self.axs.imshow(pim)
-            self.axs.imshow(pim)
-            self.fig.canvas.draw()
+        if event.ydata is not None and event.xdata is not None:
+            if event.ydata < self.image_size:
+                target_b = int(event.xdata // self.image_size)
+                self.tester.target_b = target_b
+                self.tester.x = event.xdata / self.image_size - target_b
+                self.tester.y = event.ydata / self.image_size
+                pims = self.tester.plot_predicts(self.tester.imgs, self.outs)
+                pim = np.concatenate(pims, axis=1)
+                self.axs.imshow(pim)
+                self.fig.canvas.draw()
+
+
+parser = argparse.ArgumentParser(description='Vizualizer for pixel-wise-embeddings')
+parser.add_argument('--model_path', type=str, default='weights/pixel_wise_encoder.pt')
+parser.add_argument('--images_path', type=str, default='data/test_images/cars')
+parser.add_argument('--image_size', type=int, default=512)
+parser.add_argument('--threshold', type=float, default=0.9)
+parser.add_argument('--device', type=str, default='cpu')
 
 
 if __name__ == '__main__':
-    model = torch.load('weights/pixel_wise_encoder.pt', map_location='cpu')
+    args = parser.parse_args()
+
+    model = torch.load(args.model_path, map_location='cpu')
     model.eval()
+
     viz = Visualizer(
         model=model,
-        images_paths=sorted(glob.glob('data/test_images/garden/*')),
-        device='cpu',
-        image_size=256,
-        threshold=0.9,
+        images_paths=sorted(glob.glob(args.images_path+'/*')),
+        device=args.device,
+        image_size=args.image_size,
+        threshold=args.threshold,
     )

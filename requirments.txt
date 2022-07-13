@@ -1,4 +1,3 @@
-segmentation-models-pytorch
-pytorch-metric-learning
-torch
-numpy
+segmentation-models-pytorch >= 0.2.1
+pytorch-metric-learning >= 1.5.0
+torch >= 1.9.0
