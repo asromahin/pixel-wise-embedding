@@ -23,8 +23,6 @@ FPN (256 features) - [download_model](https://drive.google.com/file/d/1VcmNGuhh5
 
 # Vizualize tool
 
-Put model in path ``
-
 ```
-    python3 vizualize.py
+    python .\visualize.py --model_path weights/pixel_wise_encoder.pt --images_path data/test_images/cars --image_size 512 
 ```
