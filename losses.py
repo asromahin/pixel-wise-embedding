@@ -62,7 +62,7 @@ class BasePixelWiseLoss(torch.nn.Module):
 
     collect_target_mask_list, collect_out_list = self.extract_mask_for_each_target(out_flat, full_out, y)
 
-    collect_out, collect_target_mask = self.generate_masks(collect_target_mask_list, collect_out_list, self.is_full)
+    collect_out, collect_target_mask = self.generate_masks(collect_out_list, collect_target_mask_list, self.is_full)
 
     collect_out = torch.softmax(collect_out, dim=1)
     collect_target_mask = collect_target_mask.argmax(dim=1)
