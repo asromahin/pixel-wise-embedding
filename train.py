@@ -46,11 +46,13 @@ class TrainStep(BaseStep):
                 self.scaler.scale(l).backward()
             else:
                 l.backward()
-            log_data['loss'].append(l.item())
             if self.amp:
                 self.scaler.step(self.optim)
             else:
                 self.optim.step()
+
+            log_data['loss'].append(l.item())
+
             if callbacks is not None:
                 for callback in callbacks:
                     callback()
