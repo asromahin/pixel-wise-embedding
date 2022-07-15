@@ -134,7 +134,7 @@ class Tester:
 
   def save_results(self, pims):
     for b in range(len(self.imgs)):
-      b_name = self.images_paths[b].split('.')[0]
+      b_name = os.path.split(self.images_paths[b].split('.')[0])[-1]
       folder_path = os.path.join(self.save_folder, b_name)
       os.makedirs(folder_path, exist_ok=True)
       cv2.imwrite(os.path.join(folder_path, str(self.iter) + '.jpg'), pims[b])
@@ -238,7 +238,7 @@ class DBSCANTester:
 
   def save_results(self, pims):
     for b in range(len(self.imgs)):
-      b_name = self.images_paths[b].split('.')[0]
+      b_name = os.path.split(self.images_paths[b].split('.')[0])[-1]
       folder_path = os.path.join(self.save_folder, b_name)
       os.makedirs(folder_path, exist_ok=True)
       cv2.imwrite(os.path.join(folder_path, str(self.iter) + '.jpg'), pims[b])
