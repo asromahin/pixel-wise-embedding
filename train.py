@@ -75,9 +75,12 @@ class TrainStepLossTrain(BaseStep):
             self.model.zero_grad()
             self.optim.zero_grad()
             self.loss_optim.zero_grad()
+
+            im = im.to(self.device)
+            mask = mask.to(self.device)
             with torch.cuda.amp.autocast(self.amp):
-                out = self.model(im.to(self.device))
-                l = self.loss(out, mask.to(self.device))
+                out = self.model(im)
+                l = self.loss(out, mask)
             if self.amp:
                 l = self.scaler.scale(l)
             l.backward()
