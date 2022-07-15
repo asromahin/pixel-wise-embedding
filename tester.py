@@ -5,6 +5,9 @@ import os
 from pytorch_metric_learning import distances
 from PIL import Image
 from torchvision.transforms import ToTensor
+# import hdbscan
+from sklearn.cluster import DBSCAN
+from sklearn import neighbors
 
 
 def gif_from_folder(folder, save_path='result.gif', duration=1000):
@@ -30,16 +33,16 @@ def gif_from_folder(folder, save_path='result.gif', duration=1000):
   )
 
 
-def get_ref(out1, out2, x, y):
+def get_ref(vectors_map, ref_vector):
   # print(out1.shape, out2.shape)
-  ref_vector = out1[y,x]
+  # ref_vector = out1[y,x]
   # print(ref_vector)
-  reshape_target = out2.reshape(-1, out2.shape[-1])
+  reshape_target = vectors_map.reshape(-1, vectors_map.shape[-1])
   dist = distances.CosineSimilarity()(torch.tensor(reshape_target), torch.tensor(ref_vector).unsqueeze(0)).detach().cpu().numpy()
   # print(reshape_target.shape)
   # dist2 = KMeans(n_clusters=5).fit_predict(dist2)
   # print(dist2.shape)
-  dist = dist.reshape((out2.shape[0], out2.shape[1]))
+  dist = dist.reshape((vectors_map.shape[0], vectors_map.shape[1]))
   return dist
 
 
@@ -114,7 +117,7 @@ class Tester:
       pim = (imgs[b].permute(1, 2, 0).detach().cpu().numpy() * 255).astype('uint8').copy()
       if b == self.target_b:
         pim = cv2.circle(pim.copy(), (x, y), self.radius, (255, 0, 0), 3)
-      dist = get_ref(out_np[self.target_b], out_np[b], x, y)
+      dist = get_ref(out_np[b], out_np[self.target_b, y, x])
       mask = (dist > self.threshold).astype('uint8')
       cntrs, _ = cv2.findContours(mask, 0, 1)
       cv2.drawContours(pim, cntrs, -1, (0, 0, 255), 3)
@@ -124,6 +127,110 @@ class Tester:
       dist = cv2.cvtColor(dist, cv2.COLOR_GRAY2BGR)
       pim = cv2.cvtColor(pim, cv2.COLOR_BGR2RGB)
       pim = np.concatenate([pim, dist], axis=0)
+      if self.plot_index:
+        pim = plot_text(pim, str(self.iter))
+      pims.append(pim)
+    return pims
+
+  def save_results(self, pims):
+    for b in range(len(self.imgs)):
+      b_name = self.images_paths[b].split('.')[0]
+      folder_path = os.path.join(self.save_folder, b_name)
+      os.makedirs(folder_path, exist_ok=True)
+      cv2.imwrite(os.path.join(folder_path, str(self.iter) + '.jpg'), pims[b])
+      gif_from_folder(
+        folder_path,
+        save_path=os.path.join(self.save_folder, b_name + '.gif'),
+        duration=self.gif_duration,
+      )
+
+  def test(self):
+    if self._real_iter % self.run_every == 0:
+      outs = self.predict(self.imgs)
+      pims = self.plot_predicts(self.imgs, outs)
+      self.save_results(pims)
+      self.iter += 1
+    self._real_iter += 1
+
+
+class DBSCANTester:
+  def __init__(
+          self,
+          model,
+          images_paths,
+          save_folder,
+          transforms,
+          threshold=0.9,
+          gif_duration=500,
+          run_every=100,
+          device='cuda',
+          plot_index=True,
+  ):
+    self.model = model
+    self.images_paths = images_paths
+    self.transforms = transforms
+    self.threshold = threshold
+    self.gif_duration = gif_duration
+    self.plot_index = plot_index
+
+    self.save_folder = save_folder
+    self.device = device
+
+    self.run_every = run_every
+
+    self.dbscan = DBSCAN(eps=120)
+    self.iter = 0
+    self._real_iter = 0
+    self.imgs = self.read_images(self.images_paths)
+
+  def read_images(self, images_paths):
+    images = []
+    for image_path in images_paths:
+      im = cv2.imread(image_path)
+      im = self.transforms(image=im)['image']
+      im = ToTensor()(im)
+      images.append(im.unsqueeze(0))
+    images = torch.cat(images, dim=0)
+    return images
+
+  def predict(self, imgs):
+    with torch.no_grad():
+      outs = self.model(imgs.to(self.device)).detach().cpu().numpy()
+    return outs
+
+  def dbscan_find_vectors(self, out_np):
+    prepare_data = out_np[::20, ::20].reshape(-1, out_np.shape[-1])
+    labels = self.dbscan.fit_predict(prepare_data)
+    res_vectors = []
+    for u in np.unique(labels):
+      mask = (labels == u)
+      cur_vectors = prepare_data[mask]
+      res_vectors.append(cur_vectors.mean(axis=0))
+    return res_vectors
+
+  def plot_predicts(self, imgs, outs):
+    # outs = outs / np.sqrt(np.sum(np.power(outs, 2), axis=1, keepdims=True))
+    out_np = np.moveaxis(outs, 1, -1)
+    vectors = self.dbscan_find_vectors(out_np[0])
+    color_for_vectors = [(np.random.randint(50, 200), np.random.randint(50, 200), np.random.randint(50, 200)) for v in vectors]
+    pims = []
+    for b in range(len(imgs)):
+      pim = (imgs[b].permute(1, 2, 0).detach().cpu().numpy() * 255).astype('uint8').copy()
+      res_mask = np.zeros_like(pim)
+      for i, v in enumerate(vectors):
+        dist = get_ref(out_np[b], v)
+        # dist = (dist - 0.5) * 2
+        # dist[dist < 0] = 0
+        mask = (dist > self.threshold).astype('uint8')
+        cntrs, _ = cv2.findContours(mask, 0, 1)
+        cv2.drawContours(pim, cntrs, -1, color_for_vectors[i], 3)
+        cv2.drawContours(res_mask, cntrs, -1, color_for_vectors[i], -1)
+      # dist = np.clip(dist, -1, 1)
+      # dist = (dist + 1) / 2
+      # dist = (dist * 255).astype('uint8')
+      # dist = cv2.cvtColor(dist, cv2.COLOR_GRAY2BGR)
+      # pim = cv2.cvtColor(pim, cv2.COLOR_BGR2RGB)
+      pim = np.concatenate([pim, res_mask], axis=0)
       if self.plot_index:
         pim = plot_text(pim, str(self.iter))
       pims.append(pim)

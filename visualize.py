@@ -6,7 +6,8 @@ import albumentations as A
 import numpy as np
 import argparse
 
-from tester import Tester
+
+from tester import Tester, DBSCANTester
 
 
 class Visualizer:
@@ -26,6 +27,7 @@ class Visualizer:
         )
 
         self.fig, self.axs = plt.subplots(figsize=(16, 16))
+        # self.hist_fig, self.hist_axs = plt.subplots(figsize=(8, 8))
 
         cid = self.fig.canvas.mpl_connect('button_press_event', self.onclick)
 
@@ -33,6 +35,9 @@ class Visualizer:
         pims = self.tester.plot_predicts(self.tester.imgs, self.outs)
         pim = np.concatenate(pims, axis=1)
         self.axs.imshow(pim)
+
+        # self.hist_axs.hist(pim[pim.shape[0]//2:].flatten(), bins=256, log=True)
+
         plt.show()
 
     def onclick(self, event):
@@ -46,12 +51,14 @@ class Visualizer:
                 pim = np.concatenate(pims, axis=1)
                 self.axs.imshow(pim)
                 self.fig.canvas.draw()
+                # self.hist_axs.hist(pim[pim.shape[0] // 2:].flatten(), bins=256, log=True, alpha=0.5)
+                # self.hist_fig.canvas.draw()
 
 
 parser = argparse.ArgumentParser(description='Vizualizer for pixel-wise-embeddings')
-parser.add_argument('--model_path', type=str, default='weights/pixel_wise_encoder.pt')
-parser.add_argument('--images_path', type=str, default='data/test_images/cars')
-parser.add_argument('--image_size', type=int, default=512)
+parser.add_argument('--model_path', type=str, default='weights/pixel_wise_encoder_v3.pt')
+parser.add_argument('--images_path', type=str, default='data/test_images/cats')
+parser.add_argument('--image_size', type=int, default=1024)
 parser.add_argument('--threshold', type=float, default=0.9)
 parser.add_argument('--device', type=str, default='cpu')
 

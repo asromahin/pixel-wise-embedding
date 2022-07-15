@@ -101,8 +101,9 @@ class ValStep(BaseStep):
             model,
             loss,
             device='cuda',
+            amp=True,
     ):
-        super(ValStep, self).__init__(model=model, loss=loss, device=device)
+        super(ValStep, self).__init__(model=model, loss=loss, device=device, amp=amp)
 
     def run(self, dataloader, callbacks=None):
         pbar = tqdm(dataloader)
