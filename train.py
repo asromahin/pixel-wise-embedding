@@ -10,6 +10,8 @@ class BaseStep:
         self.loss = loss
         self.device = device
         self.amp = amp
+        if self.amp:
+            self.scaler = torch.cuda.amp.GradScaler()
 
     def run(self, dataloader, callbacks=None):
         raise NotImplementedError
@@ -30,9 +32,6 @@ class TrainStep(BaseStep):
     def run(self, dataloader, callbacks=None):
         pbar = tqdm(dataloader)
         log_data = defaultdict(list)
-        scaler = None
-        if self.amp:
-            scaler = torch.cuda.amp.GradScaler()
         for i, (im, mask) in enumerate(pbar):
             self.model.zero_grad()
             self.optim.zero_grad()
@@ -45,14 +44,16 @@ class TrainStep(BaseStep):
                 l = self.loss(out, mask)
 
             if self.amp:
-                scaler.scale(l).backward()
+                self.scaler.scale(l).backward()
             else:
                 l.backward()
 
             if self.amp:
-                scaler.step(self.optim)
+                self.scaler.step(self.optim)
             else:
                 self.optim.step()
+
+            self.scaler.update()
 
             log_data['loss'].append(l.item())
 
@@ -101,6 +102,9 @@ class TrainStepLossTrain(BaseStep):
             else:
                 self.optim.step()
                 self.loss_optim.step()
+
+            self.scaler.update()
+
             if callbacks is not None:
                 for callback in callbacks:
                     callback()
