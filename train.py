@@ -43,8 +43,9 @@ class TrainStep(BaseStep):
                 out = self.model(im)
                 l = self.loss(out, mask)
             if self.amp:
-                l = self.scaler.scale(l)
-            l.backward()
+                self.scaler.scale(l).backward()
+            else:
+                l.backward()
             log_data['loss'].append(l.item())
             if self.amp:
                 self.scaler.step(self.optim)
@@ -94,6 +95,7 @@ class TrainStepLossTrain(BaseStep):
                 self.scaler.step(self.loss_optim)
             else:
                 self.optim.step()
+                self.loss_optim.step()
             if callbacks is not None:
                 for callback in callbacks:
                     callback()
