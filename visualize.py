@@ -57,7 +57,7 @@ class Visualizer:
 
 parser = argparse.ArgumentParser(description='Vizualizer for pixel-wise-embeddings')
 parser.add_argument('--model_path', type=str, default='weights/pixel_wise_encoder_v3.pt')
-parser.add_argument('--images_path', type=str, default='data/test_images/cats')
+parser.add_argument('--images_path', type=str, default='data/test_images/cola')
 parser.add_argument('--image_size', type=int, default=1024)
 parser.add_argument('--threshold', type=float, default=0.9)
 parser.add_argument('--device', type=str, default='cpu')

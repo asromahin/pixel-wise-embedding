@@ -7,6 +7,7 @@ class BasePixelWiseLoss(torch.nn.Module):
   def __init__(
           self,
           distance=distances.CosineSimilarity(),
+          distance_callback=lambda x: x,
           loss=losses.DiceLoss('multiclass', from_logits=False),
           is_full=True,
           ignore_classes=None,
@@ -20,6 +21,7 @@ class BasePixelWiseLoss(torch.nn.Module):
     self.batch_isolated = batch_isolated
 
     self.distance = distance
+    self.distance_callback = distance_callback
     self.loss = loss
 
   def prepare_input(self, x):
@@ -75,6 +77,7 @@ class PixelWiseLossWithMeanVector(BasePixelWiseLoss):
   def __init__(
           self,
           distance=distances.CosineSimilarity(),
+          distance_callback=lambda x: x,
           loss=losses.DiceLoss('multiclass', from_logits=False),
           is_full=True,
           ignore_classes=None,
@@ -82,6 +85,7 @@ class PixelWiseLossWithMeanVector(BasePixelWiseLoss):
   ):
     super(PixelWiseLossWithMeanVector, self).__init__(
       distance=distance,
+      distance_callback=distance_callback,
       loss=loss,
       is_full=is_full,
       ignore_classes=ignore_classes,
@@ -103,10 +107,11 @@ class PixelWiseLossWithMeanVector(BasePixelWiseLoss):
         continue
       cmask = (target == u)
       vector = self.extract_vector(cmask, full_out)
-      mean_mask = self.distance(out_flat, vector.unsqueeze(0))
-      mean_mask = mean_mask.reshape(full_out.shape[0], full_out.shape[1], full_out.shape[2])
+      distance_mask = self.distance(out_flat, vector.unsqueeze(0))
+      distance_mask = self.distance_callback(distance_mask)
+      distance_mask = distance_mask.reshape(full_out.shape[0], full_out.shape[1], full_out.shape[2])
       collect_target_mask_list.append(cmask.unsqueeze(1))
-      collect_out_list.append(mean_mask.unsqueeze(1))
+      collect_out_list.append(distance_mask.unsqueeze(1))
     return collect_target_mask_list, collect_out_list
 
 
@@ -116,6 +121,7 @@ class PixelWiseLossWithVectors(BasePixelWiseLoss):
           n_classes,
           features_size,
           distance=distances.CosineSimilarity(),
+          distance_callback=lambda x: x,
           loss=losses.DiceLoss('multiclass', from_logits=False),
           is_full=True,
           ignore_classes=None,
@@ -123,6 +129,7 @@ class PixelWiseLossWithVectors(BasePixelWiseLoss):
   ):
     super(PixelWiseLossWithVectors, self).__init__(
       distance=distance,
+      distance_callback=distance_callback,
       loss=loss,
       is_full=is_full,
       ignore_classes=ignore_classes,
@@ -147,10 +154,11 @@ class PixelWiseLossWithVectors(BasePixelWiseLoss):
         continue
       cmask = (target == u)
       vector = self.extract_vector(u)
-      mean_mask = self.distance(out_flat, vector.unsqueeze(0))
-      mean_mask = mean_mask.reshape(full_out.shape[0], full_out.shape[1], full_out.shape[2])
+      distance_mask = self.distance(out_flat, vector.unsqueeze(0))
+      distance_mask = self.distance_callback(distance_mask)
+      distance_mask = distance_mask.reshape(full_out.shape[0], full_out.shape[1], full_out.shape[2])
       collect_target_mask_list.append(cmask.unsqueeze(1))
-      collect_out_list.append(mean_mask.unsqueeze(1))
+      collect_out_list.append(distance_mask.unsqueeze(1))
     return collect_target_mask_list, collect_out_list
 
 

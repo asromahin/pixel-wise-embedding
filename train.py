@@ -105,7 +105,6 @@ class TrainStepLossTrain(BaseStep):
                 self.optim.step()
                 self.loss_optim.step()
 
-
             if callbacks is not None:
                 for callback in callbacks:
                     callback()
