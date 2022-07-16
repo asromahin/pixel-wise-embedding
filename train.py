@@ -50,10 +50,11 @@ class TrainStep(BaseStep):
 
             if self.amp:
                 self.scaler.step(self.optim)
+                self.scaler.update()
             else:
                 self.optim.step()
 
-            self.scaler.update()
+
 
             log_data['loss'].append(l.item())
 
@@ -99,11 +100,11 @@ class TrainStepLossTrain(BaseStep):
             if self.amp:
                 self.scaler.step(self.optim)
                 self.scaler.step(self.loss_optim)
+                self.scaler.update()
             else:
                 self.optim.step()
                 self.loss_optim.step()
 
-            self.scaler.update()
 
             if callbacks is not None:
                 for callback in callbacks:
