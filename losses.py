@@ -3,12 +3,19 @@ from pytorch_metric_learning import distances
 from segmentation_models_pytorch import losses
 
 
+def multiclass_out_and_mask(out, mask):
+  out = torch.softmax(out, dim=1)
+  mask = mask.argmax(dim=1)
+  return out, mask
+
+
 class BasePixelWiseLoss(torch.nn.Module):
   def __init__(
           self,
           distance=distances.CosineSimilarity(),
           distance_callback=lambda x: x,
           loss=losses.DiceLoss('multiclass', from_logits=False),
+          loss_prepare_callback=multiclass_out_and_mask,
           is_full=True,
           ignore_classes=None,
           batch_isolated=False,
@@ -23,6 +30,7 @@ class BasePixelWiseLoss(torch.nn.Module):
     self.distance = distance
     self.distance_callback = distance_callback
     self.loss = loss
+    self.loss_prepare_callback = loss_prepare_callback
 
   def prepare_input(self, x):
     full_out = x.permute(0, 2, 3, 1)
@@ -66,8 +74,7 @@ class BasePixelWiseLoss(torch.nn.Module):
 
     collect_out, collect_target_mask = self.generate_masks(collect_out_list, collect_target_mask_list, self.is_full)
 
-    collect_out = torch.softmax(collect_out, dim=1)
-    collect_target_mask = collect_target_mask.argmax(dim=1)
+    collect_out, collect_target_mask = self.loss_prepare_callback(collect_out, collect_target_mask)
 
     res_loss = self.calc_loss(collect_out, collect_target_mask)
     return res_loss
