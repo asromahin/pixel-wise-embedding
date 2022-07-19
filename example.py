@@ -23,8 +23,10 @@ if __name__ == '__main__':
     SHAPE = (256, 256)
     BATCH_SIZE = 2
     EPOCHS = 100
-    RESULT_PATH = 'results'
-    RESULT_PATH_MODEL = os.path.join(RESULT_PATH, 'models') #'/content/drive/MyDrive/projects/pets/exp1'
+    EXP_NAME = 'exp1'
+
+    RESULT_PATH = os.path.join('results', EXP_NAME)
+    RESULT_PATH_MODEL = os.path.join(RESULT_PATH, 'models')
     os.makedirs(RESULT_PATH_MODEL, exist_ok=True)
 
     RESULT_TESTER = os.path.join(RESULT_PATH, 'tester')
@@ -74,7 +76,9 @@ if __name__ == '__main__':
     # val_loader_cocostaff = DataLoader(val_dataset_cocostaff, batch_size=BATCH_SIZE, shuffle=True)
 
     # loss = PixelWiseLossWithMeanVector()
-    loss = PixelWiseLossWithVectors(3688, FEATURES_SIZE, is_full=False, ignore_classes=[0]).to(DEVICE)  # .half()
+    loss = PixelWiseLossWithVectors(3688, FEATURES_SIZE, is_full=False, ignore_classes=[0]).to(DEVICE)
+    loss.load_state_dict(torch.load(LAST_MODEL.replace('.pth', '_loss.pth')))
+
     loss_optim = torch.optim.Adam(loss.parameters(), eps=1e-4)
 
     model = smp.FPN(
@@ -83,7 +87,7 @@ if __name__ == '__main__':
         decoder_segmentation_channels=FEATURES_SIZE*2,
         decoder_pyramid_channels=FEATURES_SIZE*2,
     )
-    # model.load_state_dict(torch.load(BEST_MODEL))
+    # model.load_state_dict(torch.load(LAST_MODEL))
     optim = torch.optim.Adam(model.parameters(), eps=1e-4)
     train_step = TrainStepLossTrain(
         model=model,
@@ -141,6 +145,9 @@ if __name__ == '__main__':
         device=DEVICE,
     )
 
+    model.to(DEVICE)
+    loss.to(DEVICE)
+
     for epoch in range(EPOCHS):
 
         train_logs_ade20k = train_step.run(train_loader_ade20k, [tester_cars.test, tester_cats.test, tester_fish.test])
@@ -152,9 +159,11 @@ if __name__ == '__main__':
         cur_metric = val_logs_ade20k['loss']
 
         torch.save(model.state_dict(), LAST_MODEL)
+        torch.save(loss.state_dict(), LAST_MODEL.replace('.pth', '_loss.pth'))
         if last_metric is not None:
             if cur_metric < last_metric:
                 torch.save(model.state_dict(), BEST_MODEL)
+                torch.save(loss.state_dict(), BEST_MODEL.replace('.pth', '_loss.pth'))
         else:
             last_metric = cur_metric
 
