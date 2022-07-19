@@ -54,8 +54,6 @@ class TrainStep(BaseStep):
             else:
                 self.optim.step()
 
-
-
             log_data['loss'].append(l.item())
 
             if callbacks is not None:
