@@ -59,7 +59,7 @@ if __name__ == '__main__':
     train_dataset_ade20k, val_dataset_ade20k = get_ade20k(
         train_transforms=A.Compose([geometric_transform, aug_transform]),
         val_transforms=A.Resize(SHAPE[0], SHAPE[1]),
-        dataset_path='data/ADE20K_2021_17_01',
+        dataset_path='~/data/ADE20K_2021_17_01',
     )
     # train_dataset_cocostaff, val_dataset_cocostaff = get_cocostaff(
     #     train_transforms=A.Compose([geometric_transform, aug_transform]),
