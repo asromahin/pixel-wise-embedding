@@ -117,8 +117,8 @@ class PixelWiseLossWithMeanVector(BasePixelWiseLoss):
       cmask = (target == u)
       vector = self.extract_vector(cmask, full_out)
       distance_mask = self.distance(out_flat, vector.unsqueeze(0))
-      distance_mask = self.distance_callback(distance_mask)
       distance_mask = distance_mask.reshape(full_out.shape[0], full_out.shape[1], full_out.shape[2])
+      distance_mask = self.distance_callback(distance_mask)
       collect_target_mask_list.append(cmask.unsqueeze(1))
       collect_out_list.append(distance_mask.unsqueeze(1))
     return collect_target_mask_list, collect_out_list
@@ -166,8 +166,8 @@ class PixelWiseLossWithVectors(BasePixelWiseLoss):
       cmask = (target == u)
       vector = self.extract_vector(u)
       distance_mask = self.distance(out_flat, vector.unsqueeze(0))
-      distance_mask = self.distance_callback(distance_mask)
       distance_mask = distance_mask.reshape(full_out.shape[0], full_out.shape[1], full_out.shape[2])
+      distance_mask = self.distance_callback(distance_mask)
       collect_target_mask_list.append(cmask.unsqueeze(1))
       collect_out_list.append(distance_mask.unsqueeze(1))
     return collect_target_mask_list, collect_out_list
