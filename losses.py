@@ -200,7 +200,7 @@ class PixelWiseLossWithVectorsConvFit(PixelWiseLossWithVectors):
     self.fit_conv = torch.nn.Conv2d(in_channels=1, out_channels=1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
 
   def fit_distance(self, distance_mask):
-    distance_mask = self.fit_conv(distance_mask.unsqueeze(0))[0]
+    distance_mask = self.fit_conv(distance_mask.unsqueeze(1))[:, 0]
     return distance_mask
 
 
