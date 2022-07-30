@@ -173,5 +173,37 @@ class PixelWiseLossWithVectors(BasePixelWiseLoss):
     return collect_target_mask_list, collect_out_list
 
 
+class PixelWiseLossWithVectorsConvFit(PixelWiseLossWithVectors):
+  def __init__(
+          self,
+          n_classes,
+          features_size,
+          distance=distances.CosineSimilarity(),
+          loss=losses.DiceLoss('multiclass', from_logits=False),
+          loss_prepare_callback=multiclass_out_and_mask,
+          is_full=True,
+          ignore_classes=None,
+          batch_isolated=False,
+  ):
+    super(PixelWiseLossWithVectorsConvFit, self).__init__(
+      n_classes=n_classes,
+      features_size=features_size,
+      distance=distance,
+      distance_callback=self.fit_distance,
+      loss=loss,
+      loss_prepare_callback=loss_prepare_callback,
+      is_full=is_full,
+      ignore_classes=ignore_classes,
+      batch_isolated=batch_isolated,
+    )
+
+    self.fit_conv = torch.nn.Conv2d(in_channels=1, out_channels=1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+
+  def fit_distance(self, distance_mask):
+    distance_mask = self.fit_conv(distance_mask)
+    return distance_mask
+
+
+
 
 

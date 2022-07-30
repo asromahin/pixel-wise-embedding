@@ -56,17 +56,27 @@ class Visualizer:
 
 
 parser = argparse.ArgumentParser(description='Vizualizer for pixel-wise-embeddings')
-parser.add_argument('--model_path', type=str, default='weights/pixel_wise_encoder_v3.pt')
-parser.add_argument('--images_path', type=str, default='data/test_images/cola')
-parser.add_argument('--image_size', type=int, default=1024)
+parser.add_argument('--model_path', type=str, default='weights/pixel_wise_encoder_v2.pt')
+parser.add_argument('--images_path', type=str, default='data/test_images/helmets')
+parser.add_argument('--image_size', type=int, default=512)
 parser.add_argument('--threshold', type=float, default=0.9)
-parser.add_argument('--device', type=str, default='cpu')
+parser.add_argument('--device', type=str, default='cuda')
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    model = torch.load(args.model_path, map_location='cpu')
+    # FEATURES_SIZE = 256
+    # model = smp.FPN(
+    #     'resnet34',
+    #     classes=FEATURES_SIZE,
+    #     activation=None,
+    #     decoder_segmentation_channels=FEATURES_SIZE * 2,
+    #     decoder_pyramid_channels=FEATURES_SIZE * 2,
+    #     encoder_weights=None,
+    # )
+    # model.load_state_dict(torch.load(args.model_path, map_location='cpu'))
+    model = torch.load(args.model_path, map_location=args.device)
     model.eval()
 
     viz = Visualizer(

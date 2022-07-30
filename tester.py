@@ -119,6 +119,12 @@ class Tester:
         pim = cv2.circle(pim.copy(), (x, y), self.radius, (255, 0, 0), 3)
       dist = get_ref(out_np[b], out_np[self.target_b, y, x])
       mask = (dist > self.threshold).astype('uint8')
+
+      dist = dist * mask
+      dist = dist - self.threshold
+      dist[dist < 0] = 0
+      dist = dist/dist.max()
+
       cntrs, _ = cv2.findContours(mask, 0, 1)
       cv2.drawContours(pim, cntrs, -1, (0, 0, 255), 3)
       dist = np.clip(dist, -1, 1)

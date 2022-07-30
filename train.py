@@ -136,7 +136,7 @@ class ValStep(BaseStep):
         log_data = {k: np.mean(v) for k, v in log_data.items()}
         return log_data
 
-
+import timm
 
 
 
