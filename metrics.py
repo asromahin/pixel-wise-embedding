@@ -3,6 +3,7 @@ import segmentation_models_pytorch as smp
 
 
 class MulticlassAccuracy(torch.nn.Module):
+    __name__ = 'multiclass_acc'
     def __init__(self):
         super(MulticlassAccuracy, self).__init__()
 
