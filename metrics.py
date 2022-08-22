@@ -7,7 +7,7 @@ class MulticlassAccuracy(torch.nn.Module):
         super(MulticlassAccuracy, self).__init__()
 
     def forward(self, x, y):
-        return (x.argmax(dim=1) == y).mean()
+        return ((x.argmax(dim=1) == y)/1).mean()
 
 #
 # class BinaryAccuracy(torch.nn.Module):
