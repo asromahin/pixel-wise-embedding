@@ -9,7 +9,7 @@ import segmentation_models_pytorch as smp
 import albumentations as A
 import glob
 
-from train import TrainStep, TrainStepLossTrain, ValStep
+from train_old import TrainStep, TrainStepLossTrain, ValStep
 from losses import PixelWiseLossWithMeanVector, PixelWiseLossWithVectors
 from datasets.ade20k import get_ade20k
 from datasets.cocostaff import get_cocostaff

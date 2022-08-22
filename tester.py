@@ -38,7 +38,9 @@ def get_ref(vectors_map, ref_vector):
   # ref_vector = out1[y,x]
   # print(ref_vector)
   reshape_target = vectors_map.reshape(-1, vectors_map.shape[-1])
-  dist = distances.CosineSimilarity()(torch.tensor(reshape_target), torch.tensor(ref_vector).unsqueeze(0)).detach().cpu().numpy()
+  # dist = distances.CosineSimilarity()(torch.tensor(reshape_target), torch.tensor(ref_vector).unsqueeze(0)).detach().cpu().numpy()
+  dist = torch.nn.MSELoss(reduction='none')(torch.tensor(reshape_target),
+                                      torch.tensor(ref_vector).unsqueeze(0)).mean(dim=-1).detach().cpu().numpy()
   # print(reshape_target.shape)
   # dist2 = KMeans(n_clusters=5).fit_predict(dist2)
   # print(dist2.shape)
@@ -118,7 +120,19 @@ class Tester:
       if b == self.target_b:
         pim = cv2.circle(pim.copy(), (x, y), self.radius, (255, 0, 0), 3)
       dist = get_ref(out_np[b], out_np[self.target_b, y, x])
+
+      dist = dist / np.max(dist)
+      dist = 1 - dist
+      # size = 15
+      # filter_mask = -np.ones((size, size))
+      # filter_mask[size//2, size//2] = size**2 - 1
+      # dist = cv2.filter2D(dist, -1, filter_mask)
+      # min_val = np.min(dist)
+      # max_val = np.max(dist)
+      # dist = (dist-min_val)/(max_val-min_val)
+      # print(dist.max(), dist.min())
       mask = (dist > self.threshold).astype('uint8')
+      # mask = (dist < self.threshold).astype('uint8')
 
       # dist = dist * mask
       # dist = dist - self.threshold
@@ -127,8 +141,8 @@ class Tester:
 
       cntrs, _ = cv2.findContours(mask, 0, 1)
       cv2.drawContours(pim, cntrs, -1, (0, 0, 255), 3)
-      dist = np.clip(dist, -1, 1)
-      dist = (dist + 1) / 2
+      # dist = np.clip(dist, -1, 1)
+      # dist = (dist + 1) / 2
       dist = (dist * 255).astype('uint8')
       dist = cv2.cvtColor(dist, cv2.COLOR_GRAY2BGR)
       pim = cv2.cvtColor(pim, cv2.COLOR_BGR2RGB)

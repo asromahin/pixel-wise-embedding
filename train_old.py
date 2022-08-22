@@ -5,11 +5,9 @@ import numpy as np
 
 
 class BaseStep:
-    def __init__(self, model, out_collector, loss, metric, device, amp):
+    def __init__(self, model, loss, device, amp):
         self.model = model
-        self.out_collector = out_collector
         self.loss = loss
-        self.metric = metric
         self.device = device
         self.amp = amp
         if self.amp:
@@ -23,14 +21,12 @@ class TrainStep(BaseStep):
     def __init__(
         self,
         model,
-        out_collector,
         optim,
         loss,
-        metric=None,
         device='cuda',
         amp=True,
     ):
-        super(TrainStep, self).__init__(model=model, out_collector=out_collector, loss=loss, metric=metric, device=device, amp=amp)
+        super(TrainStep, self).__init__(model=model, loss=loss, device=device, amp=amp)
         self.optim = optim
 
     def run(self, dataloader, callbacks=None):
@@ -45,10 +41,7 @@ class TrainStep(BaseStep):
 
             with torch.cuda.amp.autocast(self.amp):
                 out = self.model(im)
-                out, mask = self.out_collector(out, mask)
                 l = self.loss(out, mask)
-                if self.metric is not None:
-                    m = self.metric(out, mask)
 
             if self.amp:
                 self.scaler.scale(l).backward()
@@ -62,8 +55,6 @@ class TrainStep(BaseStep):
                 self.optim.step()
 
             log_data['loss'].append(l.item())
-            if self.metric is not None:
-                log_data[self.metric.__name__].append(m.item())
 
             if callbacks is not None:
                 for callback in callbacks:

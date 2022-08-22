@@ -56,29 +56,29 @@ class Visualizer:
 
 
 parser = argparse.ArgumentParser(description='Vizualizer for pixel-wise-embeddings')
-parser.add_argument('--model_path', type=str, default='weights/pixel_wise_encoder_v2.pt')
-parser.add_argument('--images_path', type=str, default='data/test_images/helmets')
-parser.add_argument('--image_size', type=int, default=512)
-parser.add_argument('--threshold', type=float, default=0.9)
+parser.add_argument('--model_path', type=str, default='weights/last.pth')
+parser.add_argument('--images_path', type=str, default='data/test_images/cars')
+parser.add_argument('--image_size', type=int, default=256)
+parser.add_argument('--threshold', type=float, default=0.95)
 parser.add_argument('--device', type=str, default='cuda')
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    # FEATURES_SIZE = 256
-    # model = smp.FPN(
-    #     'resnet34',
-    #     classes=FEATURES_SIZE,
-    #     activation=None,
-    #     decoder_segmentation_channels=FEATURES_SIZE * 2,
-    #     decoder_pyramid_channels=FEATURES_SIZE * 2,
-    #     encoder_weights=None,
-    # )
-    # model.load_state_dict(torch.load(args.model_path, map_location='cpu'))
-    model = torch.load(args.model_path, map_location=args.device)
+    FEATURES_SIZE = 64
+    model = smp.FPN(
+        'efficientnet-b0',
+        classes=FEATURES_SIZE,
+        activation=None,
+        decoder_segmentation_channels=FEATURES_SIZE * 2,
+        decoder_pyramid_channels=FEATURES_SIZE * 2,
+        encoder_weights=None,
+    )
+    model.load_state_dict(torch.load(args.model_path, map_location='cpu'))
+    # model = torch.load(args.model_path, map_location=args.device)
     model.eval()
-
+    model.to(args.device)
     viz = Visualizer(
         model=model,
         images_paths=sorted(glob.glob(args.images_path+'/*')),
