@@ -124,11 +124,13 @@ class ValStep(BaseStep):
     def __init__(
             self,
             model,
+            out_collector,
             loss,
+            metric=None,
             device='cuda',
             amp=True,
     ):
-        super(ValStep, self).__init__(model=model, loss=loss, device=device, amp=amp)
+        super(ValStep, self).__init__(model=model, out_collector=out_collector, loss=loss, metric=metric, device=device, amp=amp)
 
     def run(self, dataloader, callbacks=None):
         pbar = tqdm(dataloader)
@@ -136,7 +138,11 @@ class ValStep(BaseStep):
         for i, (im, mask) in enumerate(pbar):
             with torch.no_grad():
                 out = self.model(im.to(self.device))
+                out, mask = self.out_collector(out, mask)
                 l = self.loss(out, mask.to(self.device))
+                if self.metric is not None:
+                    m = self.metric(out, mask)
+                    log_data[self.metric.__name__].append(m.item())
                 log_data['loss'].append(l.item())
             if callbacks is not None:
                 for callback in callbacks:
