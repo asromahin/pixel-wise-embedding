@@ -38,9 +38,9 @@ def get_ref(vectors_map, ref_vector):
   # ref_vector = out1[y,x]
   # print(ref_vector)
   reshape_target = vectors_map.reshape(-1, vectors_map.shape[-1])
-  # dist = distances.CosineSimilarity()(torch.tensor(reshape_target), torch.tensor(ref_vector).unsqueeze(0)).detach().cpu().numpy()
-  dist = torch.nn.MSELoss(reduction='none')(torch.tensor(reshape_target),
-                                      torch.tensor(ref_vector).unsqueeze(0)).mean(dim=-1).detach().cpu().numpy()
+  dist = distances.CosineSimilarity()(torch.tensor(reshape_target), torch.tensor(ref_vector).unsqueeze(0)).detach().cpu().numpy()
+  # dist = torch.nn.MSELoss(reduction='none')(torch.tensor(reshape_target),
+  #                                     torch.tensor(ref_vector).unsqueeze(0)).mean(dim=-1).detach().cpu().numpy()
   # print(reshape_target.shape)
   # dist2 = KMeans(n_clusters=5).fit_predict(dist2)
   # print(dist2.shape)
@@ -121,8 +121,8 @@ class Tester:
         pim = cv2.circle(pim.copy(), (x, y), self.radius, (255, 0, 0), 3)
       dist = get_ref(out_np[b], out_np[self.target_b, y, x])
 
-      dist = dist / np.max(dist)
-      dist = 1 - dist
+      # dist = dist / np.max(dist)
+      # dist = 1 - dist
       # size = 15
       # filter_mask = -np.ones((size, size))
       # filter_mask[size//2, size//2] = size**2 - 1
@@ -134,10 +134,10 @@ class Tester:
       mask = (dist > self.threshold).astype('uint8')
       # mask = (dist < self.threshold).astype('uint8')
 
-      # dist = dist * mask
-      # dist = dist - self.threshold
-      # dist[dist < 0] = 0
-      # dist = dist/dist.max()
+      dist = dist * mask
+      dist = dist - self.threshold
+      dist[dist < 0] = 0
+      dist = dist/dist.max()
 
       cntrs, _ = cv2.findContours(mask, 0, 1)
       cv2.drawContours(pim, cntrs, -1, (0, 0, 255), 3)
