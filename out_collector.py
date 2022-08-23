@@ -18,7 +18,7 @@ class BaseOutCollector(torch.nn.Module):
           self,
           distance=distances.CosineSimilarity(),
           distance_callback=lambda x: x,
-          filter_out=multiclass_out,
+          # filter_out=multiclass_out,
           ignore_classes=None,
   ):
 
@@ -28,7 +28,7 @@ class BaseOutCollector(torch.nn.Module):
 
     self.distance = distance
     self.distance_callback = distance_callback
-    self.filter_out = filter_out
+    # self.filter_out = filter_out
 
   def prepare_input(self, x):
     full_out = x.permute(0, 2, 3, 1)
@@ -50,7 +50,7 @@ class BaseOutCollector(torch.nn.Module):
 
     collect_out, collect_target_mask = self.generate_masks(collect_out_list, collect_target_mask_list)
 
-    collect_out, collect_target_mask = self.filter_out(collect_out, collect_target_mask)
+    # collect_out, collect_target_mask = self.filter_out(collect_out, collect_target_mask)
 
     return collect_out, collect_target_mask
 
@@ -60,14 +60,14 @@ class OutCollectorWithMeanVector(BaseOutCollector):
           self,
           distance=distances.CosineSimilarity(),
           distance_callback=lambda x: x,
-          filter_out=multiclass_out,
+          # filter_out=multiclass_out,
           ignore_classes=None,
   ):
     super(OutCollectorWithMeanVector, self).__init__(
       distance=distance,
       distance_callback=distance_callback,
       ignore_classes=ignore_classes,
-      filter_out=filter_out,
+      # filter_out=filter_out,
     )
 
   def extract_vector(self, cmask, full_out):
@@ -100,14 +100,14 @@ class OutCollectorWithLearningVectors(BaseOutCollector):
           features_size,
           distance=distances.CosineSimilarity(),
           distance_callback=lambda x: x,
-          filter_out=multiclass_out,
+          # filter_out=multiclass_out,
           ignore_classes=None,
   ):
     super(OutCollectorWithLearningVectors, self).__init__(
       distance=distance,
       distance_callback=distance_callback,
       ignore_classes=ignore_classes,
-      filter_out=filter_out,
+      # filter_out=filter_out,
     )
     self.n_classes = n_classes
     self.features_size = features_size
