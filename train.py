@@ -45,11 +45,12 @@ class TrainStep(BaseStep):
 
             with torch.cuda.amp.autocast(self.amp):
                 out = self.model(im)
-                out, mask = self.out_collector(out, mask)
-                l = self.loss(out, mask)
                 if self.metric is not None:
                     m = self.metric(out, mask)
                     log_data[self.metric.__name__].append(m.item())
+                out, mask = self.out_collector(out, mask)
+                l = self.loss(out, mask)
+
 
             if self.amp:
                 self.scaler.scale(l).backward()
@@ -63,6 +64,7 @@ class TrainStep(BaseStep):
                 self.optim.step()
 
             log_data['loss'].append(l.item())
+
 
             if callbacks is not None:
                 for callback in callbacks:
@@ -137,11 +139,11 @@ class ValStep(BaseStep):
         for i, (im, mask) in enumerate(pbar):
             with torch.no_grad():
                 out = self.model(im.to(self.device))
-                out, mask = self.out_collector(out, mask)
-                l = self.loss(out, mask.to(self.device))
                 if self.metric is not None:
                     m = self.metric(out, mask)
                     log_data[self.metric.__name__].append(m.item())
+                out, mask = self.out_collector(out, mask)
+                l = self.loss(out, mask.to(self.device))
                 log_data['loss'].append(l.item())
             if callbacks is not None:
                 for callback in callbacks:
