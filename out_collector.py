@@ -46,13 +46,13 @@ class BaseOutCollector(torch.nn.Module):
   def forward(self, x, y):
     full_out, out_flat = self.prepare_input(x)
 
-    collect_target_mask_list, collect_out_list = self.extract_mask_for_each_target(out_flat, full_out, y)
+    collect_target_mask_list, collect_out_list, collect_target_cls = self.extract_mask_for_each_target(out_flat, full_out, y)
 
     collect_out, collect_target_mask = self.generate_masks(collect_out_list, collect_target_mask_list)
 
     # collect_out, collect_target_mask = self.filter_out(collect_out, collect_target_mask)
 
-    return collect_out, collect_target_mask
+    return collect_out, collect_target_mask, collect_target_cls
 
 
 class OutCollectorWithMeanVector(BaseOutCollector):
