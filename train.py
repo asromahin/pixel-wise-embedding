@@ -56,7 +56,7 @@ class TrainStep(BaseStep):
                     m = self.metric(out, mask)
                     if self.is_log_per_cls:
                         for i in range(len(m)):
-                            log_data_per_cls[m.__name__+str(int(target_cls[i]))].append(m[i])
+                            log_data_per_cls[self.metric.__name__+str(int(target_cls[i]))].append(m[i])
                     if m.shape:
                         m = m.mean()
                     log_data[self.metric.__name__].append(m.item())
@@ -159,7 +159,7 @@ class ValStep(BaseStep):
                     m = self.metric(out, mask)
                     if self.is_log_per_cls:
                         for i in range(len(m)):
-                            log_data_per_cls[m.__name__+str(int(target_cls[i]))].append(m[i])
+                            log_data_per_cls[self.metric.__name__+str(int(target_cls[i]))].append(m[i])
                     if m.shape:
                         m = m.mean()
                     log_data[self.metric.__name__].append(m.item())
