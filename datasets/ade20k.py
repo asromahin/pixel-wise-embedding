@@ -75,11 +75,11 @@ class ADE20KObjectsDataset:
         return image, mask
 
 
-def get_ade20k(train_transforms, val_transforms, dataset_path='data/ADE20K_2021_17_01', mask_key='class_mask'):
+def get_ade20k(train_transforms, val_transforms, dataset_path='data/ADE20K_2021_17_01'):
     train_images = glob.glob(os.path.join(dataset_path, 'images/ADE/training/**/**/*.jpg'))
     val_images = glob.glob(os.path.join(dataset_path, 'images/ADE/validation/**/**/*.jpg'))
-    train_dataset = ADE20KDataset(train_images, transforms=train_transforms, mask_key=mask_key)
-    val_dataset = ADE20KDataset(val_images, transforms=val_transforms, mask_key=mask_key)
+    train_dataset = ADE20KObjectsDataset(train_images, transforms=train_transforms)
+    val_dataset = ADE20KObjectsDataset(val_images, transforms=val_transforms)
     return train_dataset, val_dataset
 
 
