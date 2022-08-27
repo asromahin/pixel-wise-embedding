@@ -27,15 +27,20 @@ class TrainStep(BaseStep):
         optim,
         loss,
         metric=None,
+        is_log_per_cls=False,
         device='cuda',
         amp=True,
     ):
         super(TrainStep, self).__init__(model=model, out_collector=out_collector, loss=loss, metric=metric, device=device, amp=amp)
         self.optim = optim
+        self.is_log_per_cls = is_log_per_cls
 
     def run(self, dataloader, callbacks=None):
         pbar = tqdm(dataloader)
         log_data = defaultdict(list)
+        log_data_per_cls = None
+        if self.is_log_per_cls:
+            log_data_per_cls = defaultdict(list)
         for i, (im, mask) in enumerate(pbar):
             self.model.zero_grad()
             self.optim.zero_grad()
@@ -49,6 +54,11 @@ class TrainStep(BaseStep):
                 l = self.loss(out, mask)
                 if self.metric is not None:
                     m = self.metric(out, mask)
+                    if self.is_log_per_cls:
+                        for i in range(len(m)):
+                            log_data_per_cls[m.__name__+str(int(target_cls[i]))].append(m[i])
+                    if m.shape:
+                        m = m.mean()
                     log_data[self.metric.__name__].append(m.item())
 
             if self.amp:
@@ -69,7 +79,7 @@ class TrainStep(BaseStep):
                     callback()
             pbar.set_postfix({k: np.mean(v) for k, v in log_data.items()})
         log_data = {k: np.mean(v) for k, v in log_data.items()}
-        return log_data
+        return log_data, log_data_per_cls
 
 
 class TrainStepLossTrain(BaseStep):
