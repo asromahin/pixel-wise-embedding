@@ -77,6 +77,7 @@ class OutCollectorWithMeanVector(BaseOutCollector):
   def extract_mask_for_each_target(self, out_flat, full_out, target):
     collect_target_mask_list = []
     collect_out_list = []
+    collect_target_cls = []
 
     utarget = torch.unique(target)
 
@@ -90,7 +91,8 @@ class OutCollectorWithMeanVector(BaseOutCollector):
       distance_mask = self.distance_callback(distance_mask)
       collect_target_mask_list.append(cmask.unsqueeze(1))
       collect_out_list.append(distance_mask.unsqueeze(1))
-    return collect_target_mask_list, collect_out_list
+      collect_target_cls.append(u)
+    return collect_target_mask_list, collect_out_list, collect_target_cls
 
 
 class OutCollectorWithLearningVectors(BaseOutCollector):
@@ -120,6 +122,7 @@ class OutCollectorWithLearningVectors(BaseOutCollector):
   def extract_mask_for_each_target(self, out_flat, full_out, target):
     collect_target_mask_list = []
     collect_out_list = []
+    collect_target_cls = []
 
     utarget = torch.unique(target)
 
@@ -133,7 +136,8 @@ class OutCollectorWithLearningVectors(BaseOutCollector):
       distance_mask = self.distance_callback(distance_mask)
       collect_target_mask_list.append(cmask.unsqueeze(1))
       collect_out_list.append(distance_mask.unsqueeze(1))
-    return collect_target_mask_list, collect_out_list
+      collect_target_cls.append(u)
+    return collect_target_mask_list, collect_out_list, collect_target_cls
 
 
 

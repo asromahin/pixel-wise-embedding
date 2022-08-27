@@ -10,6 +10,13 @@ class MulticlassAccuracy(torch.nn.Module):
     def forward(self, x, y):
         return ((x.argmax(dim=1) == y)/1).mean()
 
+
+class PerClassIoU(torch.nn.Module):
+    def __init__(self):
+        super(PerClassIoU, self).__init__()
+
+
+
 #
 # class BinaryAccuracy(torch.nn.Module):
 #     def __init__(self):

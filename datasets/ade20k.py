@@ -7,7 +7,7 @@ import numpy as np
 
 
 from datasets.ade20k_utils import loadAde20K
-from datasets.ade20k_classes import ade20k_class_to_code, ADE20K_CLASSES
+from datasets.ade20k_classes import ade20k_class_to_code
 
 
 class ADE20KDataset:
