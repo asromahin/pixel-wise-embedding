@@ -37,6 +37,7 @@ class ADE20KObjectsDataset:
             y = cur_poly['y']
             p = np.stack([x, y], axis=-1)
             p = np.expand_dims(p, 1)
+            p[p < 0] = 0
             if len(p) > 0:
                 cv2.drawContours(mask, [p], -1, cur_class_idx, -1)
 
