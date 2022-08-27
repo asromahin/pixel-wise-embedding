@@ -3287,5 +3287,5 @@ ADE20K_CLASSES = [
     'puddle',
 ]
 
-ade20k_class_to_code = {i: cls for i, cls in enumerate(ADE20K_CLASSES)}
-ade20k_code_to_class = {cls: i for i, cls in enumerate(ADE20K_CLASSES)}
+ade20k_code_to_class = {i: cls for i, cls in enumerate(ADE20K_CLASSES)}
+ade20k_class_to_code = {cls: i for i, cls in enumerate(ADE20K_CLASSES)}
