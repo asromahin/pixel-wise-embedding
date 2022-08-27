@@ -35,9 +35,9 @@ class ADE20KObjectsDataset:
             cur_poly = data['polygon'][i]
             x = cur_poly['x']
             y = cur_poly['y']
-            if len(x) > 0:
-                p = np.stack([x, y], axis=-1)
-                p = np.expand_dims(p, 1)
+            p = np.stack([x, y], axis=-1)
+            p = np.expand_dims(p, 1)
+            if len(p) > 0:
                 cv2.drawContours(mask, [p], -1, cur_class_idx, -1)
 
         a = self.transforms(image=image, mask=mask)
