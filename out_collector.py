@@ -157,13 +157,15 @@ class OutCollectorWithLearningVectorsWithConv(OutCollectorWithLearningVectors):
       n_classes=n_classes,
       features_size=features_size,
       distance=distance,
-      distance_callback=conv,
+      distance_callback=self.distance_callback,
       ignore_classes=ignore_classes,
       # filter_out=filter_out,
     )
 
     self.conv = conv
 
+  def distance_callback(self, x):
+    return self.conv(x.unsqueeze(1))[:, 0]
 
 
 
