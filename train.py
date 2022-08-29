@@ -4,12 +4,24 @@ from collections import defaultdict
 import numpy as np
 
 
+MODEL_KEY = 'model'
+COLLECTOR_KEY = 'collector'
+LOSS_KEY = 'loss'
+METRIC_KEY = 'metric'
+
+
 class BaseStep:
     def __init__(self, model, out_collector, loss, metric, device, amp):
         self.model = model
         self.out_collector = out_collector
         self.loss = loss
         self.metric = metric
+        self._objects = {
+            MODEL_KEY: self.model,
+            COLLECTOR_KEY: self.out_collector,
+            LOSS_KEY: self.loss,
+            METRIC_KEY: self.metric,
+        }
         self.device = device
         self.amp = amp
         if self.amp:
@@ -24,15 +36,28 @@ class TrainStep(BaseStep):
         self,
         model,
         out_collector,
-        optim,
+        # optim,
         loss,
         metric=None,
+        trainable_objets=(MODEL_KEY, ),
         is_log_per_cls=False,
         device='cuda',
         amp=True,
     ):
-        super(TrainStep, self).__init__(model=model, out_collector=out_collector, loss=loss, metric=metric, device=device, amp=amp)
-        self.optim = optim
+        super(TrainStep, self).__init__(
+            model=model,
+            out_collector=out_collector,
+            loss=loss,
+            metric=metric,
+            device=device,
+            amp=amp)
+
+        for obj in trainable_objets:
+            assert obj in [MODEL_KEY, COLLECTOR_KEY, LOSS_KEY, METRIC_KEY]
+        assert MODEL_KEY in trainable_objets
+
+        self.trainable_objets = trainable_objets
+        self.optims = {key: torch.optim.Adam(self._objects[key].parameters()) for key in self.trainable_objets}
         self.is_log_per_cls = is_log_per_cls
 
     def run(self, dataloader, callbacks=None):
@@ -42,8 +67,9 @@ class TrainStep(BaseStep):
         if self.is_log_per_cls:
             log_data_per_cls = defaultdict(list)
         for i, (im, mask) in enumerate(pbar):
-            self.model.zero_grad()
-            self.optim.zero_grad()
+            for key in self.trainable_objets:
+                self._objects[key].zero_grad()
+                self.optims[key].zero_grad()
 
             im = im.to(self.device)
             mask = mask.to(self.device)
@@ -67,10 +93,12 @@ class TrainStep(BaseStep):
                 l.backward()
 
             if self.amp:
-                self.scaler.step(self.optim)
-                self.scaler.update()
+                for key in self.trainable_objets:
+                    self.scaler.step(self.optims[key])
+                    self.scaler.update()
             else:
-                self.optim.step()
+                for key in self.trainable_objets:
+                    self.optims[key].step()
 
             log_data['loss'].append(l.item())
 
@@ -81,53 +109,6 @@ class TrainStep(BaseStep):
         log_data = {k: np.mean(v) for k, v in log_data.items()}
         log_data_per_cls = {k: np.mean(v) for k, v in log_data_per_cls.items()}
         return log_data, log_data_per_cls
-
-
-class TrainStepLossTrain(BaseStep):
-    def __init__(
-        self,
-        model,
-        optim,
-        loss,
-        loss_optim,
-        device='cuda',
-        amp=True,
-    ):
-        super(TrainStepLossTrain, self).__init__(model=model, loss=loss, device=device, amp=amp)
-        self.optim = optim
-        self.loss_optim = loss_optim
-
-    def run(self, dataloader, callbacks=None):
-        pbar = tqdm(dataloader)
-        log_data = defaultdict(list)
-        for i, (im, mask) in enumerate(pbar):
-            self.model.zero_grad()
-            self.optim.zero_grad()
-            self.loss_optim.zero_grad()
-
-            im = im.to(self.device)
-            mask = mask.to(self.device)
-            with torch.cuda.amp.autocast(self.amp):
-                out = self.model(im)
-                l = self.loss(out, mask)
-            if self.amp:
-                l = self.scaler.scale(l)
-            l.backward()
-            log_data['loss'].append(l.item())
-            if self.amp:
-                self.scaler.step(self.optim)
-                self.scaler.step(self.loss_optim)
-                self.scaler.update()
-            else:
-                self.optim.step()
-                self.loss_optim.step()
-
-            if callbacks is not None:
-                for callback in callbacks:
-                    callback()
-            pbar.set_postfix({k: np.mean(v) for k, v in log_data.items()})
-        log_data = {k: np.mean(v) for k, v in log_data.items()}
-        return log_data
 
 
 class ValStep(BaseStep):
