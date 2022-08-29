@@ -151,16 +151,18 @@ class OutCollectorWithLearningVectorsWithConv(OutCollectorWithLearningVectors):
           ignore_classes=None,
   ):
     self.kernel_size = kernel_size
-    self.conv = torch.nn.Conv2d(1, 1, kernel_size=(self.kernel_size, self.kernel_size), stride=(1, 1), padding=(self.kernel_size//2, self.kernel_size//2))
+    conv = torch.nn.Conv2d(1, 1, kernel_size=(self.kernel_size, self.kernel_size), stride=(1, 1), padding=(self.kernel_size//2, self.kernel_size//2))
 
     super(OutCollectorWithLearningVectorsWithConv, self).__init__(
       n_classes=n_classes,
       features_size=features_size,
       distance=distance,
-      distance_callback=self.conv,
+      distance_callback=conv,
       ignore_classes=ignore_classes,
       # filter_out=filter_out,
     )
+
+    self.conv = conv
 
 
 
