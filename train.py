@@ -52,11 +52,11 @@ class TrainStep(BaseStep):
             device=device,
             amp=amp)
 
-        for obj in trainable_objets:
+        for obj in trainable_objects:
             assert obj in [MODEL_KEY, COLLECTOR_KEY, LOSS_KEY, METRIC_KEY]
-        assert MODEL_KEY in trainable_objets
+        assert MODEL_KEY in trainable_objects
 
-        self.trainable_objets = trainable_objets
+        self.trainable_objets = trainable_objects
         self.optims = {key: torch.optim.Adam(self._objects[key].parameters()) for key in self.trainable_objets}
         self.is_log_per_cls = is_log_per_cls
 
