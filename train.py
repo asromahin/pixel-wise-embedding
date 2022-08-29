@@ -57,7 +57,7 @@ class TrainStep(BaseStep):
         assert MODEL_KEY in trainable_objects
 
         self.trainable_objets = trainable_objects
-        self.optims = {key: torch.optim.Adam(self._objects[key].parameters()) for key in self.trainable_objets}
+        self.optims = {key: torch.optim.Adam(self._objects[key].parameters(), eps=1e-4) for key in self.trainable_objets}
         self.is_log_per_cls = is_log_per_cls
 
     def run(self, dataloader, callbacks=None):
