@@ -39,7 +39,7 @@ class TrainStep(BaseStep):
         # optim,
         loss,
         metric=None,
-        trainable_objets=(MODEL_KEY, ),
+        trainable_objects=(MODEL_KEY, ),
         is_log_per_cls=False,
         device='cuda',
         amp=True,
