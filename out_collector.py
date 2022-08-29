@@ -140,6 +140,29 @@ class OutCollectorWithLearningVectors(BaseOutCollector):
     return collect_target_mask_list, collect_out_list, collect_target_cls
 
 
+class OutCollectorWithLearningVectorsWithConv(OutCollectorWithLearningVectors):
+  def __init__(
+          self,
+          n_classes,
+          features_size,
+          kernel_size=1,
+          distance=distances.CosineSimilarity(),
+          # filter_out=multiclass_out,
+          ignore_classes=None,
+  ):
+    self.kernel_size = kernel_size
+    self.conv = torch.nn.Conv2d(1, 1, kernel_size=(self.kernel_size, self.kernel_size), stride=(1, 1), padding=(self.kernel_size//2, self.kernel_size//2))
+
+    super(OutCollectorWithLearningVectorsWithConv, self).__init__(
+      n_classes=n_classes,
+      features_size=features_size,
+      distance=distance,
+      distance_callback=self.conv,
+      ignore_classes=ignore_classes,
+      # filter_out=filter_out,
+    )
+
+
 
 
 
