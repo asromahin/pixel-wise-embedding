@@ -107,7 +107,8 @@ class TrainStep(BaseStep):
                     callback()
             pbar.set_postfix({k: np.mean(v) for k, v in log_data.items()})
         log_data = {k: np.mean(v) for k, v in log_data.items()}
-        log_data_per_cls = {k: np.mean(v) for k, v in log_data_per_cls.items()}
+        if self.is_log_per_cls:
+            log_data_per_cls = {k: np.mean(v) for k, v in log_data_per_cls.items()}
         return log_data, log_data_per_cls
 
 
@@ -150,7 +151,8 @@ class ValStep(BaseStep):
                     callback()
             pbar.set_postfix({k: np.mean(v) for k, v in log_data.items()})
         log_data = {k: np.mean(v) for k, v in log_data.items()}
-        log_data_per_cls = {k: np.mean(v) for k, v in log_data_per_cls.items()}
+        if self.is_log_per_cls:
+            log_data_per_cls = {k: np.mean(v) for k, v in log_data_per_cls.items()}
         return log_data, log_data_per_cls
 
 
