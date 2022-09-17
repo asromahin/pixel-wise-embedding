@@ -168,6 +168,48 @@ class OutCollectorWithLearningVectorsWithConv(OutCollectorWithLearningVectors):
     return self.conv(x.unsqueeze(1))[:, 0]
 
 
+class OutCollectorWithSingleConv(BaseOutCollector):
+  def __init__(
+          self,
+          n_classes,
+          features_size,
+          distance=distances.CosineSimilarity(),
+          distance_callback=lambda x: x,
+          # filter_out=multiclass_out,
+          ignore_classes=None,
+  ):
+    super(OutCollectorWithSingleConv, self).__init__(
+      distance=distance,
+      distance_callback=distance_callback,
+      ignore_classes=ignore_classes,
+      # filter_out=filter_out,
+    )
+    self.n_classes = n_classes
+    self.features_size = features_size
+    self.conv = torch.nn.Conv2d(self.features_size, self.n_classes, kernel_size=(1,1), padding=0)
+
+  def extract_vector(self, cmask, full_out):
+    cout = full_out[cmask]
+    return torch.mean(cout, dim=0)
+
+  def extract_mask_for_each_target(self, out_flat, full_out, target):
+    collect_target_mask_list = []
+    collect_out_list = []
+    collect_target_cls = []
+
+    utarget = torch.unique(target)
+
+    outs = self.conv(full_out.permute(0, 3, 1, 2))
+
+    for i, u in enumerate(utarget):
+      if int(u) in self.ignore_classes:
+        continue
+      cmask = (target == u)
+      out_mask = outs[:, u]
+      collect_target_mask_list.append(cmask.unsqueeze(1))
+      collect_out_list.append(out_mask.unsqueeze(1))
+      collect_target_cls.append(u)
+    return collect_target_mask_list, collect_out_list, collect_target_cls
 
 
 
