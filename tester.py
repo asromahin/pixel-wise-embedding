@@ -127,17 +127,17 @@ class Tester:
       # filter_mask = -np.ones((size, size))
       # filter_mask[size//2, size//2] = size**2 - 1
       # dist = cv2.filter2D(dist, -1, filter_mask)
-      # min_val = np.min(dist)
-      # max_val = np.max(dist)
-      # dist = (dist-min_val)/(max_val-min_val)
+      min_val = np.min(dist)
+      max_val = np.max(dist)
+      dist = (dist-min_val)/(max_val-min_val)
       # print(dist.max(), dist.min())
       mask = (dist > self.threshold).astype('uint8')
       # mask = (dist < self.threshold).astype('uint8')
 
-      dist = dist * mask
-      dist = dist - self.threshold
-      dist[dist < 0] = 0
-      dist = dist/dist.max()
+      # dist = dist * mask
+      # dist = dist - self.threshold
+      # dist[dist < 0] = 0
+      # dist = dist/dist.max()
 
       cntrs, _ = cv2.findContours(mask, 0, 1)
       cv2.drawContours(pim, cntrs, -1, (0, 0, 255), 3)

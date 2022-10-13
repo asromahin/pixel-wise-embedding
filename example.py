@@ -34,18 +34,11 @@ if __name__ == '__main__':
     BEST_MODEL = os.path.join(RESULT_PATH_MODEL, 'best.pth')
     LAST_MODEL = os.path.join(RESULT_PATH_MODEL, 'last.pth')
 
-    geometric_transform = A.Compose([
-        A.OneOf([
+    geometric_transform = A.OneOf([
             A.Resize(SHAPE[0], SHAPE[1]),
             A.RandomResizedCrop(SHAPE[0], SHAPE[1]),
-            A.Compose([
-                A.PadIfNeeded(SHAPE[0] + 1, SHAPE[1] + 1),
-                A.RandomCrop(SHAPE[0], SHAPE[1]),
-            ])
+        ])
 
-        ], p=1)
-
-    ], p=1)
 
     aug_transform = A.Compose([
         A.Flip(),
@@ -70,8 +63,8 @@ if __name__ == '__main__':
     #     dataset_path='data/coco',
     # )
 
-    train_loader_ade20k = DataLoader(train_dataset_ade20k, batch_size=BATCH_SIZE, shuffle=True)
-    val_loader_ade20k = DataLoader(val_dataset_ade20k, batch_size=BATCH_SIZE, shuffle=False)
+    train_loader_ade20k = DataLoader(train_dataset_ade20k, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
+    val_loader_ade20k = DataLoader(val_dataset_ade20k, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
 
     # train_loader_cocostaff = DataLoader(train_dataset_cocostaff, batch_size=BATCH_SIZE, shuffle=True)
     # val_loader_cocostaff = DataLoader(val_dataset_cocostaff, batch_size=BATCH_SIZE, shuffle=True)
@@ -142,7 +135,7 @@ if __name__ == '__main__':
 
     tester_fish = Tester(
         model,
-        images_paths=sorted(glob.glob('data/test_images/cats/*')),
+        images_paths=sorted(glob.glob('data/test_images/fish/*')),
         x=0.7, y=0.7,
         target_b=0,
         save_folder=os.path.join(RESULT_TESTER, 'fish'),

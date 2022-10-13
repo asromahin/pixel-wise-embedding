@@ -186,7 +186,7 @@ class OutCollectorWithSingleConv(BaseOutCollector):
     )
     self.n_classes = n_classes
     self.features_size = features_size
-    self.conv = torch.nn.Conv2d(self.features_size, self.n_classes, kernel_size=(1,1), padding=0)
+    self.conv = torch.nn.Conv2d(self.features_size, self.n_classes, kernel_size=(1, 1), padding=0)
 
   def extract_vector(self, cmask, full_out):
     cout = full_out[cmask]
